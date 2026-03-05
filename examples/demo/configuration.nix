@@ -14,56 +14,60 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
-  nix.settings = {
-    # Manual optimise storage: nix-store --optimise
-    # https://nixos.org/manual/nix/stable/command-ref/conf-file.html#conf-auto-optimise-store
-    auto-optimise-store = true;
-    builders-use-substitutes = true;
-    # enable flakes globally
-    experimental-features = ["nix-command" "flakes"];
+  nix = {
+    settings = {
+      # Manual optimise storage: nix-store --optimise
+      # https://nixos.org/manual/nix/stable/command-ref/conf-file.html#conf-auto-optimise-store
+      auto-optimise-store = true;
+      builders-use-substitutes = true;
+      # enable flakes globally
+      experimental-features = ["nix-command" "flakes"];
+    };
+    # make `nix run nixpkgs#nixpkgs` use the same nixpkgs as the one used by this flake.
+    registry.nixpkgs.flake = nixpkgs;
+    # make `nix repl '<nixpkgs>'` use the same nixpkgs as the one used by this flake.
+    nixPath = ["/etc/nix/inputs"];
   };
-
-  # make `nix run nixpkgs#nixpkgs` use the same nixpkgs as the one used by this flake.
-  nix.registry.nixpkgs.flake = nixpkgs;
-  # make `nix repl '<nixpkgs>'` use the same nixpkgs as the one used by this flake.
-  environment.etc."nix/inputs/nixpkgs".source = "${nixpkgs}";
-  nix.nixPath = ["/etc/nix/inputs"];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   #
   # TODO feel free to add or remove packages here.
-  environment.systemPackages = with pkgs; [
-    neovim
+  environment = {
+    etc."nix/inputs/nixpkgs".source = "${nixpkgs}";
 
-    # networking
-    mtr # A network diagnostic tool
-    iperf3 # A tool for measuring TCP and UDP bandwidth performance
-    nmap # A utility for network discovery and security auditing
-    ldns # replacement of dig, it provide the command `drill`
-    socat # replacement of openbsd-netcat
-    tcpdump # A powerful command-line packet analyzer
+    systemPackages = with pkgs; [
+      neovim
 
-    # archives
-    zip
-    xz
-    unzip
-    p7zip
-    zstd
-    gnutar
+      # networking
+      mtr # A network diagnostic tool
+      iperf3 # A tool for measuring TCP and UDP bandwidth performance
+      nmap # A utility for network discovery and security auditing
+      ldns # replacement of dig, it provide the command `drill`
+      socat # replacement of openbsd-netcat
+      tcpdump # A powerful command-line packet analyzer
 
-    # misc
-    file
-    which
-    tree
-    gnused
-    gawk
-    tmux
-    docker-compose
-  ];
+      # archives
+      zip
+      xz
+      unzip
+      p7zip
+      zstd
+      gnutar
 
-  # replace default editor with neovim
-  environment.variables.EDITOR = "nvim";
+      # misc
+      file
+      which
+      tree
+      gnused
+      gawk
+      tmux
+      docker-compose
+    ];
+
+    # replace default editor with neovim
+    variables.EDITOR = "nvim";
+  };
 
   virtualisation.docker = {
     enable = true;
