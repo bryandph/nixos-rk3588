@@ -28,7 +28,7 @@
         };
       };
     }
-    // flake-utils.lib.eachDefaultSystem (system: {
+    // flake-utils.lib.eachDefaultSystem (_system: {
       packages = {
         inherit (self.nixosConfigurations.orangepi5plus.config.system.build) sdImage;
       };

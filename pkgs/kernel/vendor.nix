@@ -11,7 +11,6 @@
   fetchFromGitHub,
   linuxManualConfig,
   ubootTools,
-  fetchurl,
   ...
 }: let
   modDirVersion = "6.1.115";

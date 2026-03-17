@@ -1,12 +1,4 @@
-{
-  config,
-  lib,
-  options,
-  pkgs,
-  modulesPath,
-  nixos-generators,
-  ...
-}: let
+{nixos-generators, ...}: let
   # Import raw-efi from nixos-generators
   inherit (nixos-generators.nixosModules) raw-efi;
 in {
