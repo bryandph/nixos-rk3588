@@ -1,5 +1,5 @@
 # =========================================================================
-#      Orange Pi 5 Plus Specific Configuration
+#      Orange Pi 5 Pro Specific Configuration
 # =========================================================================
 {
   pkgs,
@@ -11,6 +11,7 @@ in {
   imports = [
     ./base.nix
     ./dtb-install.nix
+    ./orangepi5pro-extras.nix
   ];
 
   boot = {
