@@ -75,6 +75,11 @@
             core = import ./modules/boards/rock5a.nix;
             sd-image = ./modules/sd-image/rock5a.nix;
           };
+          # Turing RK1 compute module (full RK3588)
+          turing-rk1 = {
+            core = import ./modules/boards/turing-rk1.nix;
+            sd-image = ./modules/sd-image/turing-rk1.nix;
+          };
         };
 
         formats = {...}: {
@@ -172,12 +177,14 @@
         sdImage-opi5plus = self.nixosConfigurations.orangepi5plus.config.system.build.sdImage;
         sdImage-opi5pro = self.nixosConfigurations.orangepi5pro.config.system.build.sdImage;
         sdImage-rock5a = self.nixosConfigurations.rock5a.config.system.build.sdImage;
+        sdImage-turing-rk1 = self.nixosConfigurations.turing-rk1.config.system.build.sdImage;
 
         sdImage-opi5-cross = self.nixosConfigurations.orangepi5-cross.config.system.build.sdImage;
         sdImage-opi5b-cross = self.nixosConfigurations.orangepi5b-cross.config.system.build.sdImage;
         sdImage-opi5plus-cross = self.nixosConfigurations.orangepi5plus-cross.config.system.build.sdImage;
         sdImage-opi5pro-cross = self.nixosConfigurations.orangepi5pro-cross.config.system.build.sdImage;
         sdImage-rock5a-cross = self.nixosConfigurations.rock5a-cross.config.system.build.sdImage;
+        sdImage-turing-rk1-cross = self.nixosConfigurations.turing-rk1-cross.config.system.build.sdImage;
 
         # UEFI raw image
         rawEfiImage-opi5 = self.nixosConfigurations.orangepi5-uefi.config.formats.rk3588-raw-efi;
