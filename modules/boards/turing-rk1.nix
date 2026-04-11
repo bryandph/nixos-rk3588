@@ -46,6 +46,9 @@
   hardware = {
     deviceTree = {
       name = "rockchip/rk3588-turing-rk1.dtb";
+      # Filter to only RK3588 DTBs — mainline kernel builds DTBs for ALL
+      # aarch64 boards (~3000 files) which overflows the firmware partition.
+      filter = "*rk3588*";
       overlays = [];
     };
   };
