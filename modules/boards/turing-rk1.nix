@@ -14,6 +14,7 @@
   rk3588,
   config,
   pkgs,
+  lib,
   ...
 }: let
   inherit (rk3588) pkgsKernel;
@@ -38,20 +39,34 @@ in {
   boot = {
     kernelPackages = pkgsKernel.linuxPackagesFor vendorKernel;
 
-    # kernelParams copy from Armbian's /boot/armbianEnv.txt & /boot/boot.cmd
-    kernelParams = [
+    # mkForce to override sd-image-aarch64.nix defaults (ttyS0, ttyAMA0, tty0)
+    # that conflict with the RK1's UART layout.
+    kernelParams = lib.mkForce [
+      "root=UUID=0bf70c3b-50f8-4f22-8254-2eaf50f1f7b7"
+      "rootfstype=ext4"
       "rootwait"
 
-      "earlycon" # enable early console, so we can see the boot messages via serial port / HDMI
-      "consoleblank=0" # disable console blanking(screen saver)
-      "console=ttyS9,1500000" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC at 1.5Mbaud (MUST be last for primary console)
+      "earlycon" # enable early console before ttyS9 driver loads
+      "consoleblank=0" # disable console blanking
+      "console=ttyS9,1500000" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC at 1.5Mbaud
+      "loglevel=7"
 
-      # docker optimizations
+      # cgroup v1 compat for k3s
       "cgroup_enable=cpuset"
       "cgroup_memory=1"
       "cgroup_enable=memory"
       "swapaccount=1"
     ];
+
+    # Minimal initrd — only eMMC and NVMe needed
+    initrd.includeDefaultModules = lib.mkForce false;
+    initrd.availableKernelModules = lib.mkForce [
+      "mmc_block" # eMMC / SD
+      "nvme" # NVMe SSD
+    ];
+
+    # No ZFS on RK1
+    supportedFilesystems = lib.mkForce ["vfat" "ext4"];
   };
 
   hardware = {

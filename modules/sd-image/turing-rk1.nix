@@ -13,11 +13,6 @@ in {
   ];
 
   boot = {
-    kernelParams = [
-      "root=UUID=${rootPartitionUUID}"
-      "rootfstype=ext4"
-    ];
-
     loader = {
       grub.enable = lib.mkForce false;
       generic-extlinux-compatible.enable = lib.mkForce true;
