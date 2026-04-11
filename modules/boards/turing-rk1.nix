@@ -48,7 +48,7 @@ in {
 
       "earlycon" # enable early console before ttyS9 driver loads
       "consoleblank=0" # disable console blanking
-      "console=ttyS9,1500000" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC at 1.5Mbaud
+      "console=ttyS9" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC (inherit U-Boot baud)
       "loglevel=7"
 
       # cgroup v1 compat for k3s
