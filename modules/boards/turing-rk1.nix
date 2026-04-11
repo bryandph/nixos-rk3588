@@ -44,7 +44,7 @@ in {
 
       "earlycon" # enable early console, so we can see the boot messages via serial port / HDMI
       "consoleblank=0" # disable console blanking(screen saver)
-      "console=ttyS9,115200" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC (MUST be last for primary console)
+      "console=ttyS9,1500000" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC at 1.5Mbaud (MUST be last for primary console)
 
       # docker optimizations
       "cgroup_enable=cpuset"
