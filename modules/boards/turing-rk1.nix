@@ -1,54 +1,37 @@
 # =========================================================================
-#      Turing RK1 Specific Configuration
+#      Turing RK1 — Mainline Kernel Configuration
 # =========================================================================
 #
 # The RK1 is a compute module (SO-DIMM form factor) with a full RK3588.
-# No WiFi/BT/LEDs to configure — board has no extras beyond base.
+# Uses mainline kernel (linuxPackages_latest) for stability — no vendor
+# kernel fiq-debugger quirks, no PCIe hang with mainline driver timeouts.
 #
-# PCIe workaround: The Turing Pi 2 backplane leaves PCIe lanes unconnected
-# for most slots, causing the rk-pcie vendor driver to hang during link
-# training. We patch the DTB with fdtput to disable both controllers.
-# Standard DT overlays (target-path) silently fail with this vendor kernel's
-# libfdt, so we modify the DTB source directly.
+# UART layout:
+#   - UART2 (0xfeb50000): Rockchip debug UART, test pads only (not BMC)
+#   - UART9 (0xfebc0000): Routed via SO-DIMM to Turing Pi 2 BMC at 115200
+#
+# U-Boot console: UART9 at 115200 (CONFIG_DEBUG_UART_BASE=0xFEBC0000)
+# BMC (bmcd): hardcoded 115200 8N1
 {
-  rk3588,
-  config,
   pkgs,
   lib,
   ...
-}: let
-  inherit (rk3588) pkgsKernel;
-  vendorKernel = pkgsKernel.callPackage ../../pkgs/kernel/vendor.nix {};
-
-  # Patch the vendor DTB to disable PCIe controllers that hang on the
-  # Turing Pi 2 backplane (no devices connected → infinite link training).
-  patchedDtbs = pkgs.runCommand "patched-rk1-dtbs" {
-    nativeBuildInputs = [pkgs.dtc];
-  } ''
-    cp -r ${vendorKernel}/dtbs $out
-    chmod -R u+w $out
-    fdtput -t s $out/rockchip/rk3588-turing-rk1.dtb /pcie@fe150000 status disabled
-    fdtput -t s $out/rockchip/rk3588-turing-rk1.dtb /pcie@fe180000 status disabled
-  '';
-in {
+}: {
   imports = [
     ./base.nix
     ./dtb-install.nix
   ];
 
   boot = {
-    kernelPackages = pkgsKernel.linuxPackagesFor vendorKernel;
+    kernelPackages = pkgs.linuxPackages_latest;
 
     # mkForce to override sd-image-aarch64.nix defaults (ttyS0, ttyAMA0, tty0)
-    # that conflict with the RK1's UART layout.
     kernelParams = lib.mkForce [
       "root=UUID=0bf70c3b-50f8-4f22-8254-2eaf50f1f7b7"
       "rootfstype=ext4"
       "rootwait"
 
-      "earlycon" # enable early console before ttyS9 driver loads
-      "consoleblank=0" # disable console blanking
-      "console=ttyS9,1500000" # UART9 — SO-DIMM to Turing Pi 2 BMC. 1.5Mbaud keeps kernel alive (115200 deadlocks vendor kernel)
+      "console=ttyS9,115200" # UART9 — SO-DIMM to Turing Pi 2 BMC
       "loglevel=7"
       "net.ifnames=0" # keep classic eth0 naming for GMAC
 
@@ -58,22 +41,11 @@ in {
       "cgroup_enable=memory"
       "swapaccount=1"
     ];
-
-    # Minimal initrd — only eMMC and NVMe needed
-    initrd.includeDefaultModules = lib.mkForce false;
-    initrd.availableKernelModules = lib.mkForce [
-      "mmc_block" # eMMC / SD
-      "nvme" # NVMe SSD
-    ];
-
-    # No ZFS on RK1
-    supportedFilesystems = lib.mkForce ["vfat" "ext4"];
   };
 
   hardware = {
     deviceTree = {
       name = "rockchip/rk3588-turing-rk1.dtb";
-      dtbSource = patchedDtbs;
       overlays = [];
     };
   };
