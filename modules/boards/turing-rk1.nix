@@ -24,7 +24,7 @@
   patchedDtbs = pkgs.runCommand "patched-rk1-dtbs" {
     nativeBuildInputs = [pkgs.dtc];
   } ''
-    cp -r ${pkgsKernel.linuxPackagesFor vendorKernel}/kernel/dtbs $out
+    cp -r ${vendorKernel}/dtbs $out
     chmod -R u+w $out
     fdtput -t s $out/rockchip/rk3588-turing-rk1.dtb /pcie@fe150000 status disabled
     fdtput -t s $out/rockchip/rk3588-turing-rk1.dtb /pcie@fe180000 status disabled
