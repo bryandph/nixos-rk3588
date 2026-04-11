@@ -44,8 +44,7 @@ in {
 
       "earlycon" # enable early console, so we can see the boot messages via serial port / HDMI
       "consoleblank=0" # disable console blanking(screen saver)
-      "console=ttyFIQ0" # vendor kernel fiq_debugger claims UART2 as ttyFIQ0
-      "console=ttyS2,1500000" # fallback — maps to BMC UART bridge on Turing Pi 2
+      "console=ttyS9,115200" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC (MUST be last for primary console)
 
       # docker optimizations
       "cgroup_enable=cpuset"
