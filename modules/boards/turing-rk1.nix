@@ -50,6 +50,7 @@ in {
       "consoleblank=0" # disable console blanking
       "console=ttyS9" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC (inherit U-Boot baud)
       "loglevel=7"
+      "net.ifnames=0" # keep classic eth0 naming for GMAC
 
       # cgroup v1 compat for k3s
       "cgroup_enable=cpuset"
