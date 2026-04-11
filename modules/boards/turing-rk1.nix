@@ -40,6 +40,7 @@ in {
       overlays = [
         {
           name = "disable-pcie";
+          filter = "*rk3588-turing-rk1*";
           dtsText = ''
             /dts-v1/;
             /plugin/;
