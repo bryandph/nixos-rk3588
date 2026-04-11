@@ -48,8 +48,7 @@ in {
 
       "earlycon" # enable early console before ttyS9 driver loads
       "consoleblank=0" # disable console blanking
-      "console=ttyS2,1500000" # UART2 debug (secondary)
-      "console=ttyS9,115200" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC (matches Ubuntu config)
+      "console=ttyS9,115200" # UART9 — routed via SO-DIMM to Turing Pi 2 BMC (115200 8N1, matches Ubuntu/U-Boot/bmcd)
       "loglevel=7"
       "net.ifnames=0" # keep classic eth0 naming for GMAC
 
