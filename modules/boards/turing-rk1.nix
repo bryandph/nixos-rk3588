@@ -31,7 +31,6 @@ in {
       "cgroup_memory=1"
       "cgroup_enable=memory"
       "swapaccount=1"
-
     ];
   };
 
@@ -40,24 +39,27 @@ in {
       name = "rockchip/rk3588-turing-rk1.dtb";
       overlays = [
         {
-          # Disable PCIe controllers — the rk-pcie platform driver hangs during
-          # link training on the Turing Pi 2 backplane. The vendor kernel's
-          # rk-pcie driver ignores pci=off (it's a platform driver, not PCI bus).
           name = "disable-pcie";
           dtsText = ''
             /dts-v1/;
             /plugin/;
 
-            &pcie2x1l1 {
-              status = "disabled";
-            };
+            / {
+              compatible = "turing,rk1", "rockchip,rk3588";
 
-            &pcie3x4 {
-              status = "disabled";
-            };
+              fragment@0 {
+                target-path = "/pcie@fe150000";
+                __overlay__ {
+                  status = "disabled";
+                };
+              };
 
-            &pcie30phy {
-              status = "disabled";
+              fragment@1 {
+                target-path = "/pcie@fe180000";
+                __overlay__ {
+                  status = "disabled";
+                };
+              };
             };
           '';
         }
