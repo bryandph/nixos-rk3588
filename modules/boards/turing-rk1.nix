@@ -4,11 +4,31 @@
 #
 # The RK1 is a compute module (SO-DIMM form factor) with a full RK3588.
 # No WiFi/BT/LEDs to configure — board has no extras beyond base.
+#
+# PCIe workaround: The Turing Pi 2 backplane leaves PCIe lanes unconnected
+# for most slots, causing the rk-pcie vendor driver to hang during link
+# training. We patch the DTB with fdtput to disable both controllers.
+# Standard DT overlays (target-path) silently fail with this vendor kernel's
+# libfdt, so we modify the DTB source directly.
 {
   rk3588,
+  config,
+  pkgs,
   ...
 }: let
   inherit (rk3588) pkgsKernel;
+  vendorKernel = pkgsKernel.callPackage ../../pkgs/kernel/vendor.nix {};
+
+  # Patch the vendor DTB to disable PCIe controllers that hang on the
+  # Turing Pi 2 backplane (no devices connected → infinite link training).
+  patchedDtbs = pkgs.runCommand "patched-rk1-dtbs" {
+    nativeBuildInputs = [pkgs.dtc];
+  } ''
+    cp -r ${pkgsKernel.linuxPackagesFor vendorKernel}/kernel/dtbs $out
+    chmod -R u+w $out
+    fdtput -t s $out/rockchip/rk3588-turing-rk1.dtb /pcie@fe150000 status disabled
+    fdtput -t s $out/rockchip/rk3588-turing-rk1.dtb /pcie@fe180000 status disabled
+  '';
 in {
   imports = [
     ./base.nix
@@ -16,7 +36,7 @@ in {
   ];
 
   boot = {
-    kernelPackages = pkgsKernel.linuxPackagesFor (pkgsKernel.callPackage ../../pkgs/kernel/vendor.nix {});
+    kernelPackages = pkgsKernel.linuxPackagesFor vendorKernel;
 
     # kernelParams copy from Armbian's /boot/armbianEnv.txt & /boot/boot.cmd
     kernelParams = [
@@ -37,34 +57,8 @@ in {
   hardware = {
     deviceTree = {
       name = "rockchip/rk3588-turing-rk1.dtb";
-      overlays = [
-        {
-          name = "disable-pcie";
-          filter = "*rk3588-turing-rk1*";
-          dtsText = ''
-            /dts-v1/;
-            /plugin/;
-
-            / {
-              compatible = "turing,rk1", "rockchip,rk3588";
-
-              fragment@0 {
-                target-path = "/pcie@fe150000";
-                __overlay__ {
-                  status = "disabled";
-                };
-              };
-
-              fragment@1 {
-                target-path = "/pcie@fe180000";
-                __overlay__ {
-                  status = "disabled";
-                };
-              };
-            };
-          '';
-        }
-      ];
+      dtbSource = patchedDtbs;
+      overlays = [];
     };
   };
 }
