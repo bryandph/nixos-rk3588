@@ -6,7 +6,8 @@
   ...
 }: let
   rootPartitionUUID = "0bf70c3b-50f8-4f22-8254-2eaf50f1f7b7";
-  uboot = pkgs.callPackage ../../pkgs/u-boot-turing-rk1 {};
+  # Use nixpkgs' upstream ubootTuringRK1 (matches GiyoMoon's working config)
+  uboot = pkgs.ubootTuringRK1;
 in {
   imports = [
     "${rk3588.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
