@@ -31,6 +31,7 @@
       "rootfstype=ext4"
       "rootwait"
 
+      "earlycon=uart8250,mmio32,0xfebc0000,115200" # earlycon on UART9 hardware address
       "console=ttyS9,115200" # UART9 — SO-DIMM to Turing Pi 2 BMC
       "loglevel=7"
       "net.ifnames=0" # keep classic eth0 naming for GMAC
