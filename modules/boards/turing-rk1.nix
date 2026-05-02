@@ -25,6 +25,15 @@
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
 
+    # systemd-stage1 + extlinux `root=UUID=...` + initrd-fstab `/` with
+    # x-initrd.mount = duplicate sysroot.mount unit. systemd-fstab-generator
+    # creates one from each source and exits with status 1; the downstream
+    # sysroot-run.mount (NixOS-internal tmpfs at /sysroot/run) then fails
+    # its dep check and the system drops to emergency. Script-based stage-1
+    # mounts root from the cmdline directly via busybox and avoids the whole
+    # generator collision. mkForce because nixpkgs unstable defaults this on.
+    initrd.systemd.enable = lib.mkForce false;
+
     # nixpkgs default 8250 driver caps NR_UARTS at 8 (ttyS0..ttyS7).
     # RK3588 has UART0-UART9; UART9 is wired to the Turing Pi BMC, so
     # ttyS9 must register or `console=ttyS9` silently fails and the
