@@ -5,19 +5,15 @@
   rk3588,
   ...
 }: let
-  rootPartitionUUID = "14e19a7b-0ae0-484d-9d54-43bd6fdc20c7";
-  uboot = pkgs.callPackage ../../pkgs/u-boot-opi5pro {};
+  rootPartitionUUID = "0bf70c3b-50f8-4f22-8254-2eaf50f1f7b7";
+  # Use nixpkgs' upstream ubootTuringRK1 (matches GiyoMoon's working config)
+  uboot = pkgs.ubootTuringRK1;
 in {
   imports = [
     "${rk3588.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
   ];
 
   boot = {
-    kernelParams = [
-      "root=UUID=${rootPartitionUUID}"
-      "rootfstype=ext4"
-    ];
-
     loader = {
       grub.enable = lib.mkForce false;
       generic-extlinux-compatible.enable = lib.mkForce true;
@@ -26,7 +22,8 @@ in {
 
   sdImage = {
     inherit rootPartitionUUID;
-    compressImage = true;
+    # BMC requires raw .img — no compression saves a decompress step on flash
+    compressImage = false;
 
     # install firmware into a separate partition: /boot/firmware
     populateFirmwareCommands = ''
