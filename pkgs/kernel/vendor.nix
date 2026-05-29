@@ -25,8 +25,11 @@ in
       owner = "armbian";
       repo = "linux-rockchip";
       #rev = "rk-6.1-rkr5.1";
-      rev = "b908c7339f51eddcfe8402cd15d1e1f8f4e67c29";
-      hash = "sha256-70wGP16SJHs7I8HklhNdrJbWzfvcgJCupgfOq81e1U8=";
+      # Bumped to rk-6.1-rkr5.1 HEAD (2026-05-29) to pull current Armbian
+      # RK3588 fixes — notably for the orangepi5pro's YT6801 PCIe NIC.
+      # (orangepi5 itself runs mainline now and doesn't use this kernel.)
+      rev = "60ffebcdbb8f486cab5efcaf93964811ffb6f483";
+      hash = "sha256-psos+kpWj9dXSEbK9yOraKHX4odfK3O0wl77i/IseMQ=";
     };
 
     kernelPatches = [
