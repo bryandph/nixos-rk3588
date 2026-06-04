@@ -25,15 +25,6 @@
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
 
-    # systemd-stage1 + extlinux `root=UUID=...` + initrd-fstab `/` with
-    # x-initrd.mount = duplicate sysroot.mount unit. systemd-fstab-generator
-    # creates one from each source and exits with status 1; the downstream
-    # sysroot-run.mount (NixOS-internal tmpfs at /sysroot/run) then fails
-    # its dep check and the system drops to emergency. Script-based stage-1
-    # mounts root from the cmdline directly via busybox and avoids the whole
-    # generator collision. mkForce because nixpkgs unstable defaults this on.
-    initrd.systemd.enable = lib.mkForce false;
-
     # nixpkgs default 8250 driver caps NR_UARTS at 8 (ttyS0..ttyS7).
     # RK3588 has UART0-UART9; UART9 is wired to the Turing Pi BMC, so
     # ttyS9 must register or `console=ttyS9` silently fails and the
@@ -49,10 +40,18 @@
       }
     ];
 
-    # mkForce to override sd-image-aarch64.nix defaults (ttyS0, ttyAMA0, tty0)
+    # mkForce to override sd-image-aarch64.nix defaults (ttyS0, ttyAMA0, tty0).
+    #
+    # No `root=` is set on purpose. Root is mounted from fileSystems."/"
+    # (by-label NIXOS_SD, x-initrd.mount), which is the single source of truth
+    # for systemd-stage1. An explicit `root=UUID=...` here was vestigial —
+    # NixOS stage-1 ignores it and mounts from the fstab — but under systemd
+    # initrd it made systemd-fstab-generator emit a *second* sysroot.mount
+    # (by-uuid) that conflicted with the fstab one (by-label), failing the
+    # generator and dropping the board to emergency. Omitting it lets systemd
+    # initrd work, same as the orangepi5 boards. (Scripted initrd is deprecated
+    # and removed in NixOS 26.11.)
     kernelParams = lib.mkForce [
-      "root=UUID=0bf70c3b-50f8-4f22-8254-2eaf50f1f7b7"
-      "rootfstype=ext4"
       "rootwait"
 
       # Bare `earlycon` reads chosen.stdout-path + DT clock-frequency.
