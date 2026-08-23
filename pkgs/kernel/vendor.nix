@@ -46,7 +46,16 @@ in
     configfile = ./rk35xx_vendor_config;
     config = import ./rk35xx_vendor_config.nix;
   }).overrideAttrs (old: {
-    name = "k"; # dodge uboot length limits
+    # Historical note: this used to force `name = "k"` to "dodge uboot
+    # length limits". That console-buffer limit doesn't bind here: the
+    # kernel name only reaches the extlinux KERNEL/FDTDIR lines
+    # (/boot/nixos/<hash>-<name>-Image, ~90 chars with the full name),
+    # while the APPEND line already carries the far longer
+    # init=/nix/store/<hash>-nixos-system-<host>-<release>/init and
+    # boots fine — as do sibling boards (turing-rk1, mainline opi5)
+    # using standard full-length kernel names on the same U-Boot path.
+    # Keeping linuxManualConfig's default name (linux-<version>) makes
+    # the derivation identifiable in build logs and binary caches.
     nativeBuildInputs = old.nativeBuildInputs ++ [ubootTools];
 
     # The hacky mali code tries to include a binary blob by a relative path,
